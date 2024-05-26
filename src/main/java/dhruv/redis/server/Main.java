@@ -1,10 +1,6 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+package dhruv.redis.server;
+
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class Main {
 
@@ -17,8 +13,12 @@ public class Main {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             serverSocket.setReuseAddress(true);
 
+            EventLoop eventLoop = EventLoop.getInstance();
+            eventLoop.addListener();
+
             RedisServer redisServer = new RedisServer(serverSocket);
             redisServer.start();
+
         } catch (Exception e) {
             System.out.println("IOException: " + e.getMessage());
         }

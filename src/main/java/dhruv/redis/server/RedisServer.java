@@ -1,3 +1,5 @@
+package dhruv.redis.server;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,6 +31,7 @@ public class RedisServer {
         try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
+//                Thread.startVirtualThread(() -> processSocket(clientSocket));
                 executorService.submit(() -> processSocket(clientSocket));
             }
         }
@@ -41,15 +44,14 @@ public class RedisServer {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 OutputStream outputStream = clientSocket.getOutputStream();
         ) {
-            while ((inputLine = bufferedReader.readLine()) != null) {
-                outputLine = processCommand(inputLine.toUpperCase());
-                System.out.println("input: " + inputLine + " | out: " + outputLine);
+            RespDataGenerator respDataGenerator = new RespDataGenerator();
 
-                if (outputLine != null) {
-                    outputStream.write(outputLine.getBytes(StandardCharsets.UTF_8));
-                }
+            while ((inputLine = bufferedReader.readLine()) != null) {
+                respDataGenerator.readInput(inputLine, outputStream);
+                System.out.println("input: " + inputLine);
             }
-        } catch (IOException ex) {
+
+        } catch (Exception ex) {
             System.out.println("Error while processing socket commands");
             ex.printStackTrace();
         } finally {
@@ -62,13 +64,5 @@ public class RedisServer {
                 }
             }
         }
-    }
-
-    private String processCommand(String command) {
-        return switch (command) {
-            case PING_COMMAND -> PING_OUTPUT;
-            case COMMAND -> COMMAND_OUTPUT;
-            default -> null;
-        };
     }
 }
