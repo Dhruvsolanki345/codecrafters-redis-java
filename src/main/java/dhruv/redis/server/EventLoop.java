@@ -50,7 +50,6 @@ public class EventLoop {
     }
 
     public void addListener(Runnable runnable) {
-
         Thread.ofPlatform().start(runnable);
     }
 }

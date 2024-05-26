@@ -106,7 +106,7 @@ public class Parser {
         if (size >= 5) {
             String argName = arrayRespData.getData().get(3).toString().toUpperCase();
             String argValueInStr = arrayRespData.getData().get(4).toString();
-            if (!Tools.isLong(argValueInStr)) {
+            if (Tools.isNotNumber(argValueInStr)) {
                 return SimpleErrorRespData.invalidArgs("for EX/PX");
             }
 
