@@ -14,7 +14,7 @@ public class Main {
             serverSocket.setReuseAddress(true);
 
             EventLoop eventLoop = EventLoop.getInstance();
-            eventLoop.addListener();
+            eventLoop.addListener(Parser::parser);
 
             RedisServer redisServer = new RedisServer(serverSocket);
             redisServer.start();

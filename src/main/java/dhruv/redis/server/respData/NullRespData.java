@@ -6,9 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Data
 @EqualsAndHashCode(callSuper = true)
 public class NullRespData extends BaseRespData {
+
+    @Override
+    public String toString() {
+        return "";
+    }
 
     @Override
     public String toResp() {

@@ -2,14 +2,16 @@ package dhruv.redis.server.respData;
 
 import dhruv.redis.server.constant.RespTerminology;
 import dhruv.redis.server.constant.RespType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @EqualsAndHashCode(callSuper = true)
 public class ArrayRespData extends BaseRespData {
     private List<BaseRespData> data = new ArrayList<>();
@@ -46,11 +48,16 @@ public class ArrayRespData extends BaseRespData {
     }
 
     @Override
+    public String toString() {
+        return data.stream().map(BaseRespData::toString).collect(Collectors.joining());
+    }
+
+    @Override
     public String toResp() {
         return RespTerminology.RESP_PREFIX.ARRAY
                 + String.valueOf(size)
                 + RespTerminology.CRLF
-                + data.stream().map(BaseRespData::toString).collect(Collectors.joining())
+                + data.stream().map(BaseRespData::toResp).collect(Collectors.joining())
                 ;
     }
 

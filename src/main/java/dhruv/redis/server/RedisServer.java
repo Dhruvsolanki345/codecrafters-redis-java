@@ -31,7 +31,6 @@ public class RedisServer {
         try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-//                Thread.startVirtualThread(() -> processSocket(clientSocket));
                 executorService.submit(() -> processSocket(clientSocket));
             }
         }

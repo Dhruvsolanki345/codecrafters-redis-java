@@ -1,14 +1,17 @@
 package dhruv.redis.server.respData;
 
 import dhruv.redis.server.constant.RespType;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.OutputStream;
 
-@Data
+@Getter
+@Setter
 public abstract class BaseRespData {
     private OutputStream outputStream;
+
+    public abstract String toString();
 
     public abstract String toResp();
 

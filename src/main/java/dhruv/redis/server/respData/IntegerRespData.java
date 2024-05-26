@@ -5,17 +5,27 @@ import dhruv.redis.server.constant.RespType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 @EqualsAndHashCode(callSuper = true)
 public class IntegerRespData extends BaseRespData {
     private Integer data;
 
+    public void setData(int data) {
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(data);
+    }
+
     @Override
     public String toResp() {
         return RespTerminology.RESP_PREFIX.INTEGER
-                + String.valueOf(data)
+                + toString()
                 + RespTerminology.CRLF;
     }
 
