@@ -72,7 +72,7 @@ public class RespDataGenerator {
 
             previousRespType = null;
 
-            String errorResp = SimpleErrorRespData.fatalError(e.getMessage()).toResp();
+            String errorResp = SimpleErrorRespData.error(e.getMessage()).toResp();
             outputStream.write(errorResp.getBytes(StandardCharsets.UTF_8));
         }
     }

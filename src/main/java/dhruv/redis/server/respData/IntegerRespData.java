@@ -3,7 +3,6 @@ package dhruv.redis.server.respData;
 import dhruv.redis.server.constant.RespTerminology;
 import dhruv.redis.server.constant.RespType;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 

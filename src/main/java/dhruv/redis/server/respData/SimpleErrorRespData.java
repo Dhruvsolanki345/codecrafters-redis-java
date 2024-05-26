@@ -3,7 +3,6 @@ package dhruv.redis.server.respData;
 import dhruv.redis.server.constant.RespTerminology;
 import dhruv.redis.server.constant.RespType;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -43,11 +42,15 @@ public class SimpleErrorRespData extends BaseRespData {
         return data != null && !data.isEmpty();
     }
 
-    public static SimpleErrorRespData invalidArgs() {
+    public static SimpleErrorRespData missingArgs() {
         return SimpleErrorRespData.builder().data("ERR Missing Argument").build();
     }
 
-    public static SimpleErrorRespData fatalError(String message) {
+    public static SimpleErrorRespData invalidArgs(String message) {
+        return SimpleErrorRespData.builder().data("ERR Invalid Argument " + message).build();
+    }
+
+    public static SimpleErrorRespData error(String message) {
         return SimpleErrorRespData.builder().data("ERR " + message).build();
     }
 }

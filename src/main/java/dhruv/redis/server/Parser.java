@@ -3,6 +3,7 @@ package dhruv.redis.server;
 import dhruv.redis.server.constant.Command;
 import dhruv.redis.server.constant.RespType;
 import dhruv.redis.server.respData.*;
+import dhruv.redis.server.utils.Tools;
 
 import java.nio.charset.StandardCharsets;
 
@@ -41,7 +42,7 @@ public class Parser {
 
             try {
                 command = command.toUpperCase();
-                BaseRespData outputResp = SimpleErrorRespData.fatalError("Invalid command");
+                BaseRespData outputResp = SimpleErrorRespData.error("Invalid command");
 
                 if (command.equals(Command.PING)) {
                     outputResp = processPing();
@@ -77,12 +78,12 @@ public class Parser {
 
     private static BaseRespData processEcho(BaseRespData dataTransfer) {
         if (dataTransfer.getType() != RespType.ARRAY) {
-            return SimpleErrorRespData.invalidArgs();
+            return SimpleErrorRespData.missingArgs();
         }
 
         ArrayRespData arrayRespData = (ArrayRespData) dataTransfer;
         if (arrayRespData.getData().size() < 2) {
-            return SimpleErrorRespData.invalidArgs();
+            return SimpleErrorRespData.missingArgs();
         }
 
         return arrayRespData.getData().get(1);
@@ -90,29 +91,47 @@ public class Parser {
 
     private static BaseRespData processSet(BaseRespData dataTransfer) {
         if (dataTransfer.getType() != RespType.ARRAY) {
-            return SimpleErrorRespData.invalidArgs();
+            return SimpleErrorRespData.missingArgs();
         }
 
         ArrayRespData arrayRespData = (ArrayRespData) dataTransfer;
-        if (arrayRespData.getData().size() < 3) {
-            return SimpleErrorRespData.invalidArgs();
+        int size = arrayRespData.getSize();
+        if (size < 3) {
+            return SimpleErrorRespData.missingArgs();
         }
 
         String key = arrayRespData.getData().get(1).toString();
         String value = arrayRespData.getData().get(2).toString();
 
-        cache.set(key, value);
+        if (size >= 5) {
+            String argName = arrayRespData.getData().get(3).toString().toUpperCase();
+            String argValueInStr = arrayRespData.getData().get(4).toString();
+            if (!Tools.isLong(argValueInStr)) {
+                return SimpleErrorRespData.invalidArgs("for EX/PX");
+            }
+
+            long argVal = Long.parseLong(argValueInStr);
+            if (argName.equals("EX")) {
+                cache.setEX(key, value, argVal);
+            } else if (argName.equals("PX")) {
+                cache.setPX(key, value, argVal);
+            }
+
+        } else {
+            cache.set(key, value);
+        }
+
         return SimpleStringRespData.builder().data("OK").build();
     }
 
     private static BaseRespData processGet(BaseRespData dataTransfer) {
         if (dataTransfer.getType() != RespType.ARRAY) {
-            return SimpleErrorRespData.invalidArgs();
+            return SimpleErrorRespData.missingArgs();
         }
 
         ArrayRespData arrayRespData = (ArrayRespData) dataTransfer;
         if (arrayRespData.getData().size() < 2) {
-            return SimpleErrorRespData.invalidArgs();
+            return SimpleErrorRespData.missingArgs();
         }
 
         String key = arrayRespData.getData().get(1).toString();

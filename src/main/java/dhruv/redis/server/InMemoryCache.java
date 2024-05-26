@@ -19,16 +19,16 @@ public class InMemoryCache<K, V> {
     private final Map<K, TtlValue<V>> cache;
     private final Set<K> ttlEnabledKeys;
 
-    private final static int DEFAULT_JOB_DELAY_IN_SEC = 60;
+    private final static int DEFAULT_JOB_DELAY_IN_SEC = 5; // increase it, if want to run for large amount of time
 
     @Getter
     @Setter
     private static class TtlValue<V> {
-        private long expiryInSec;
+        private long expiryInMillis;
         private V value;
 
-        public TtlValue( V value, long expiryInSec) {
-            this.expiryInSec = expiryInSec;
+        public TtlValue( V value, long expiryInMillis) {
+            this.expiryInMillis = expiryInMillis;
             this.value = value;
         }
 
@@ -43,7 +43,7 @@ public class InMemoryCache<K, V> {
 
         // Run a job to expire key with ttl
         ScheduledThreadPoolExecutor cleanUpScheduler = new ScheduledThreadPoolExecutor(1);
-        cleanUpScheduler.schedule(this::cleanUp, jobDelayInSec, TimeUnit.SECONDS);
+        cleanUpScheduler.scheduleAtFixedRate(this::cleanUp, 0, jobDelayInSec, TimeUnit.SECONDS);
     }
 
     public InMemoryCache() {
@@ -54,13 +54,23 @@ public class InMemoryCache<K, V> {
         cache.put(key, new TtlValue<>(value));
     }
 
-    public void set(K key, V value, int ttl) {
+    public void setEX(K key, V value, long ttl) {
         if (ttl <= 0) {
             set(key, value);
             return;
         }
 
-        cache.put(key, new TtlValue<>(value, Instant.now().plusSeconds(ttl).getEpochSecond()));
+        cache.put(key, new TtlValue<>(value, Instant.now().plusSeconds(ttl).toEpochMilli()));
+        ttlEnabledKeys.add(key);
+    }
+
+    public void setPX(K key, V value, long ttl) {
+        if (ttl <= 0) {
+            set(key, value);
+            return;
+        }
+
+        cache.put(key, new TtlValue<>(value, Instant.now().plusMillis(ttl).toEpochMilli()));
         ttlEnabledKeys.add(key);
     }
 
@@ -71,7 +81,7 @@ public class InMemoryCache<K, V> {
             return null;
         }
 
-        if (ttlValue.getExpiryInSec() != 0 && ttlValue.getExpiryInSec() < Instant.now().getEpochSecond()) {
+        if (ttlValue.getExpiryInMillis() != 0 && ttlValue.getExpiryInMillis() < Instant.now().toEpochMilli()) {
             remove(key);
             return null;
         }
@@ -88,7 +98,7 @@ public class InMemoryCache<K, V> {
         for (K key : ttlEnabledKeys) {
             TtlValue<V> value = cache.get(key);
 
-            if (value == null || value.getExpiryInSec() == 0 || value.getExpiryInSec() >= Instant.now().getEpochSecond()) {
+            if (value == null || value.getExpiryInMillis() == 0 || value.getExpiryInMillis() >= Instant.now().toEpochMilli()) {
                 continue;
             }
 
